@@ -1,5 +1,9 @@
 package internal
 
+import (
+	"strconv"
+)
+
 func ToPostfix(tokens []*Token) []*Token {
 	queue := newQueue()
 	stack := newStack()
@@ -47,4 +51,37 @@ func getOperatorPrecedence(operator string) int {
 	}
 
 	return 0
+}
+
+func EvaluatePostfix(tokens []*Token) float64 {
+	stack := newStack()
+	queue := &queue{Values: tokens}
+
+	for !queue.isEmpty() {
+		current := queue.dequeue()
+		switch current.Type {
+		case NUMBER_TOKEN:
+			stack.push(current)
+		case OPERATOR_TOKEN:
+			leftToken := stack.pop()
+			rightToken := stack.pop()
+			a, _ := strconv.ParseFloat(leftToken.Value, 64)
+			b, _ := strconv.ParseFloat(rightToken.Value, 64)
+			var c float64
+			switch current.Value {
+			case "+":
+				c = b + a
+			case "-":
+				c = b - a
+			case "*":
+				c = b * a
+			case "/":
+				c = b / a
+			}
+			stack.push(NewToken(NUMBER_TOKEN, strconv.FormatFloat(c, 'E', -1, 64), rightToken.Position))
+		}
+	}
+
+	res, _ := strconv.ParseFloat(stack.pop().Value, 64)
+	return res
 }
