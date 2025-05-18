@@ -109,9 +109,10 @@ func TestToPostfix(t *testing.T) {
 
 func TestEvaluatePostfix(t *testing.T) {
 	tests := []struct {
-		name   string
-		tokens []*internal.Token
-		want   float64
+		name      string
+		tokens    []*internal.Token
+		want      float64
+		expectErr bool
 	}{
 		{
 			name: "Simple Addition",
@@ -168,12 +169,31 @@ func TestEvaluatePostfix(t *testing.T) {
 			},
 			want: 0,
 		},
+		{
+			name: "Division by Zero",
+			tokens: []*internal.Token{
+				internal.NewToken(internal.NUMBER_TOKEN, "5", 1),
+				internal.NewToken(internal.NUMBER_TOKEN, "0", 2),
+				internal.NewToken(internal.OPERATOR_TOKEN, "/", 3),
+			},
+			expectErr: true,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := internal.EvaluatePostfix(tt.tokens)
-			if math.Abs(got-tt.want) > 1e-9 { // floating-point safe comparison
+			got, err := internal.EvaluatePostfix(tt.tokens)
+			if tt.expectErr {
+				if err == nil {
+					t.Errorf("Expected error but got nil")
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("Unexpected error: %v", err)
+				return
+			}
+			if math.Abs(got-tt.want) > 1e-9 {
 				t.Errorf("EvaluatePostfix() = %v, want %v", got, tt.want)
 			}
 		})

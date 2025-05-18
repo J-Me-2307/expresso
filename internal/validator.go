@@ -29,7 +29,7 @@ func ValidateTokens(tokens []*Token) []error {
 	}
 
 	// Check if first token is operator
-	if tokens[0].Type == OPERATOR_TOKEN {
+	if tokens[0].Type == OPERATOR_TOKEN && tokens[0].Value != "-" {
 		errs = append(errs, &ParseError{"Expression cannot start with an operator", tokens[0].Position, tokens[0].Value, "number or '('"})
 	}
 

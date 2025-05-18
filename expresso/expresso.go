@@ -1,16 +1,36 @@
 package expresso
 
-import "github.com/J-Me-2307/expresso/internal"
+import (
+	"errors"
+
+	"github.com/J-Me-2307/expresso/internal"
+)
+
+type ValidationError struct {
+	Errors []error
+}
+
+func (v ValidationError) Error() string {
+	return errors.Join(v.Errors...).Error()
+}
+
+func (v ValidationError) Unwrap() error {
+	return errors.Join(v.Errors...)
+}
 
 func Evaluate(expression string) (float64, error) {
-	// Tokenize
 	tokens := internal.Tokenize(expression)
 
-	// Convert to postfix
+	if errs := internal.ValidateTokens(tokens); len(errs) > 0 {
+		return 0, ValidationError{errs}
+	}
 
-	// Evaluate postfix
+	postfixExpression := internal.ToPostfix(tokens)
 
-	// return result
+	res, err := internal.EvaluatePostfix(postfixExpression)
+	if err != nil {
+		return 0, err
+	}
 
-	return 0, nil
+	return res, nil
 }

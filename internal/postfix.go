@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"strconv"
 )
 
@@ -53,7 +54,7 @@ func getOperatorPrecedence(operator string) int {
 	return 0
 }
 
-func EvaluatePostfix(tokens []*Token) float64 {
+func EvaluatePostfix(tokens []*Token) (float64, error) {
 	stack := newStack()
 	queue := &queue{Values: tokens}
 
@@ -85,6 +86,9 @@ func EvaluatePostfix(tokens []*Token) float64 {
 			case "*":
 				result = a * b
 			case "/":
+				if b == 0 {
+					return 0, fmt.Errorf("cannot divide by zero")
+				}
 				result = a / b
 			}
 
@@ -93,5 +97,5 @@ func EvaluatePostfix(tokens []*Token) float64 {
 	}
 
 	res, _ := strconv.ParseFloat(stack.pop().Value, 64)
-	return res
+	return res, nil
 }
