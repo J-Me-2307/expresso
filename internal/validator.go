@@ -56,25 +56,23 @@ func ValidateTokens(tokens []*Token) []error {
 			continue
 		}
 
-		// If the token is a '(' push it to the stack
 		if token.Type == LPAREN_TOKEN {
 			parentheseStack = append(parentheseStack, token)
 			continue
 		}
 
-		// If the token is a ')' pop the last '(' from the stack
 		if token.Type == RPAREN_TOKEN {
 			if len(parentheseStack) > 0 {
 				parentheseStack = parentheseStack[:len(parentheseStack)-1]
 			} else {
-				errs = append(errs, &ParseError{"parse error at position %d: Unmatched closing parentheses", token.Position, "", ""})
+				errs = append(errs, &ParseError{"Unmatched closing parentheses", token.Position, "", ""})
 			}
 		}
 	}
 
 	if len(parentheseStack) > 0 {
 		for _, token := range parentheseStack {
-			errs = append(errs, &ParseError{"parse error at position %d: Unmatched opening parentheses", token.Position, "", ""})
+			errs = append(errs, &ParseError{"Unmatched opening parentheses", token.Position, "", ""})
 		}
 	}
 	return errs
