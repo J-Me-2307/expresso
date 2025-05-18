@@ -1,6 +1,7 @@
 package internal_test
 
 import (
+	"math"
 	"testing"
 
 	"github.com/J-Me-2307/expresso/internal"
@@ -101,6 +102,79 @@ func TestToPostfix(t *testing.T) {
 				if got[i].Type != tt.want[i].Type || got[i].Value != tt.want[i].Value {
 					t.Errorf("Mismatch at position %d: got %v, want %v", i, got[i], tt.want[i])
 				}
+			}
+		})
+	}
+}
+
+func TestEvaluatePostfix(t *testing.T) {
+	tests := []struct {
+		name   string
+		tokens []*internal.Token
+		want   float64
+	}{
+		{
+			name: "Simple Addition",
+			tokens: []*internal.Token{
+				internal.NewToken(internal.NUMBER_TOKEN, "3", 1),
+				internal.NewToken(internal.NUMBER_TOKEN, "4", 2),
+				internal.NewToken(internal.OPERATOR_TOKEN, "+", 3),
+			},
+			want: 7,
+		},
+		{
+			name: "Operator Precedence (3 + 4 * 2)",
+			tokens: []*internal.Token{
+				internal.NewToken(internal.NUMBER_TOKEN, "3", 1),
+				internal.NewToken(internal.NUMBER_TOKEN, "4", 2),
+				internal.NewToken(internal.NUMBER_TOKEN, "2", 3),
+				internal.NewToken(internal.OPERATOR_TOKEN, "*", 4),
+				internal.NewToken(internal.OPERATOR_TOKEN, "+", 5),
+			},
+			want: 11,
+		},
+		{
+			name: "With Parentheses (3 + (4 * 2))",
+			tokens: []*internal.Token{
+				internal.NewToken(internal.NUMBER_TOKEN, "3", 1),
+				internal.NewToken(internal.NUMBER_TOKEN, "4", 2),
+				internal.NewToken(internal.NUMBER_TOKEN, "2", 3),
+				internal.NewToken(internal.OPERATOR_TOKEN, "*", 4),
+				internal.NewToken(internal.OPERATOR_TOKEN, "+", 5),
+			},
+			want: 11,
+		},
+		{
+			name: "Complex Expression ((1 + 2) * (3 + 4))",
+			tokens: []*internal.Token{
+				internal.NewToken(internal.NUMBER_TOKEN, "1", 1),
+				internal.NewToken(internal.NUMBER_TOKEN, "2", 2),
+				internal.NewToken(internal.OPERATOR_TOKEN, "+", 3),
+				internal.NewToken(internal.NUMBER_TOKEN, "3", 4),
+				internal.NewToken(internal.NUMBER_TOKEN, "4", 5),
+				internal.NewToken(internal.OPERATOR_TOKEN, "+", 6),
+				internal.NewToken(internal.OPERATOR_TOKEN, "*", 7),
+			},
+			want: 21,
+		},
+		{
+			name: "Division and Subtraction (8 / 4 - 2)",
+			tokens: []*internal.Token{
+				internal.NewToken(internal.NUMBER_TOKEN, "8", 1),
+				internal.NewToken(internal.NUMBER_TOKEN, "4", 2),
+				internal.NewToken(internal.OPERATOR_TOKEN, "/", 3),
+				internal.NewToken(internal.NUMBER_TOKEN, "2", 4),
+				internal.NewToken(internal.OPERATOR_TOKEN, "-", 5),
+			},
+			want: 0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := internal.EvaluatePostfix(tt.tokens)
+			if math.Abs(got-tt.want) > 1e-9 { // floating-point safe comparison
+				t.Errorf("EvaluatePostfix() = %v, want %v", got, tt.want)
 			}
 		})
 	}

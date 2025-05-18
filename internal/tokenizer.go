@@ -87,8 +87,12 @@ func Tokenize(expression string) []*Token {
 						break
 					}
 				}
+				if len(value) == 1 {
+					tokenType = OPERATOR_TOKEN
+				}
 			} else {
 				value = string(current)
+				tokenType = OPERATOR_TOKEN
 				i++
 			}
 

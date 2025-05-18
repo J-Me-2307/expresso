@@ -16,7 +16,7 @@ func ToPostfix(tokens []*Token) []*Token {
 		case OPERATOR_TOKEN:
 			for !stack.isEmpty() {
 				top := stack.peek()
-				if top.Type == OPERATOR_TOKEN || getOperatorPrecedence(top.Value) < getOperatorPrecedence(token.Value) {
+				if top.Type != OPERATOR_TOKEN || getOperatorPrecedence(top.Value) < getOperatorPrecedence(token.Value) {
 					break
 				}
 				queue.enqueue(stack.pop())
@@ -63,22 +63,32 @@ func EvaluatePostfix(tokens []*Token) float64 {
 		case NUMBER_TOKEN:
 			stack.push(current)
 		case OPERATOR_TOKEN:
-			leftToken := stack.pop()
 			rightToken := stack.pop()
+			leftToken := stack.pop()
+
+			if rightToken == nil {
+				rightToken = NewToken(NUMBER_TOKEN, "0", 0)
+			}
+			if leftToken == nil {
+				leftToken = NewToken(NUMBER_TOKEN, "0", 0)
+			}
+
 			a, _ := strconv.ParseFloat(leftToken.Value, 64)
 			b, _ := strconv.ParseFloat(rightToken.Value, 64)
-			var c float64
+
+			var result float64
 			switch current.Value {
 			case "+":
-				c = b + a
+				result = a + b
 			case "-":
-				c = b - a
+				result = a - b
 			case "*":
-				c = b * a
+				result = a * b
 			case "/":
-				c = b / a
+				result = a / b
 			}
-			stack.push(NewToken(NUMBER_TOKEN, strconv.FormatFloat(c, 'E', -1, 64), rightToken.Position))
+
+			stack.push(NewToken(NUMBER_TOKEN, strconv.FormatFloat(result, 'f', -1, 64), leftToken.Position))
 		}
 	}
 
