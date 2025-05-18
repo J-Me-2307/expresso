@@ -59,7 +59,7 @@ func TestEvaluate(t *testing.T) {
 			if tt.wantErr {
 				t.Fatal("Evaluate() succeeded unexpectedly")
 			}
-			if got == tt.want {
+			if got != tt.want {
 				t.Errorf("Evaluate() = %v, want %v", got, tt.want)
 			}
 		})
